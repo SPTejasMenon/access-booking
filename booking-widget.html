@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Access Slot Booking</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+<!-- Jotform Custom Widget SDK -->
+<script type="text/javascript" src="https://cdn.jotfor.ms/s/umd/latest/for-widget.js"></script>
+
+<style>
+  :root {
+    --sp-dark-green: #123524;
+    --sp-dark-green-2: #1c4a34;
+    --sp-light-green: #7bc47f;
+    --sp-light-green-tint: #e9f5ec;
+    --sp-black: #111111;
+    --sp-white: #ffffff;
+    --sp-grey: #9aa39d;
+    --sp-grey-tint: #f1f3f2;
+    --sp-danger: #b3261e;
+    --radius: 12px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: transparent;
+    color: var(--sp-black);
+  }
+
+  #widget-root {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 20px 18px 24px;
+  }
+
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .header .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--sp-light-green);
+    flex-shrink: 0;
+  }
+
+  .header h1 {
+    font-size: 17px;
+    font-weight: 800;
+    margin: 0;
+    color: var(--sp-dark-green);
+    letter-spacing: -0.01em;
+  }
+
+  .notice {
+    background: var(--sp-light-green-tint);
+    border: 1px solid var(--sp-light-green);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--sp-dark-green-2);
+    margin-bottom: 18px;
+    font-weight: 600;
+  }
+
+  label.field-label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--sp-grey);
+    margin-bottom: 6px;
+  }
+
+  input[type="date"] {
+    width: 100%;
+    padding: 12px 14px;
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    border: 1.5px solid #dfe4e1;
+    border-radius: var(--radius);
+    color: var(--sp-black);
+    background: var(--sp-white);
+    margin-bottom: 20px;
+    outline: none;
+    transition: border-color 0.15s ease;
+  }
+
+  input[type="date"]:focus {
+    border-color: var(--sp-dark-green);
+  }
+
+  .slots-section { margin-bottom: 6px; }
+
+  .slot-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .slot-btn {
+    position: relative;
+    border: 1.5px solid #dfe4e1;
+    background: var(--sp-white);
+    border-radius: var(--radius);
+    padding: 14px 10px;
+    font-family: 'Manrope', sans-serif;
+    font-size: 14.5px;
+    font-weight: 700;
+    color: var(--sp-black);
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .slot-btn:hover:not(:disabled) {
+    border-color: var(--sp-light-green);
+    transform: translateY(-1px);
+  }
+
+  .slot-btn .sub {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--sp-grey);
+  }
+
+  .slot-btn.selected {
+    background: var(--sp-dark-green);
+    border-color: var(--sp-dark-green);
+    color: var(--sp-white);
+  }
+
+  .slot-btn.selected .sub {
+    color: rgba(255,255,255,0.75);
+  }
+
+  .slot-btn.selected::after {
+    content: "✓";
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    font-size: 14px;
+    font-weight: 800;
+  }
+
+  .slot-btn:disabled {
+    background: var(--sp-grey-tint);
+    border-color: var(--sp-grey-tint);
+    color: var(--sp-grey);
+    cursor: not-allowed;
+  }
+
+  .slot-btn:disabled .sub { color: var(--sp-grey); }
+
+  .status-row {
+    margin-top: 12px;
+    min-height: 18px;
+    font-size: 12.5px;
+    font-weight: 700;
+  }
+
+  .status-row.error { color: var(--sp-danger); }
+  .status-row.info { color: var(--sp-grey); }
+
+  .full-banner {
+    background: #fdecea;
+    border: 1px solid #f3c2bd;
+    color: var(--sp-danger);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  .placeholder-hint {
+    font-size: 13px;
+    color: var(--sp-grey);
+    font-weight: 600;
+    padding: 16px 2px;
+    text-align: center;
+  }
+
+  .spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--sp-grey-tint);
+    border-top-color: var(--sp-dark-green);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div id="widget-root">
+  <div class="header">
+    <span class="dot"></span>
+    <h1>Book Your Access Slot</h1>
+  </div>
+
+  <div class="notice">
+    Your access slot is only used to manage daily capacity. You may arrive at any time during our opening hours.
+  </div>
+
+  <label class="field-label" for="access-date">Select a date</label>
+  <input type="date" id="access-date" />
+
+  <div class="slots-section" id="slots-section">
+    <div class="placeholder-hint">Select a date to see available access slots.</div>
+  </div>
+
+  <div class="status-row" id="status-row"></div>
+</div>
+
+<script>
+(function () {
+  // ---------------------------------------------------------------------
+  // CONFIG - update this before publishing the widget.
+  // This must point at your deployed Azure Function app.
+  // ---------------------------------------------------------------------
+  const CONFIG = {
+  API_BASE_URL: "https://script.google.com/macros/s/AKfycbyoO3tR9DohQdV03LsnKEBp8EOpg_j8RHnGz7LSTEZ68aKChl9uRcxrCo9fZSD5UhUPtQ/exec,
+  TOTAL_SLOTS: 6
+};
+  // ---------------------------------------------------------------------
+
+  const dateInput = document.getElementById("access-date");
+  const slotsSection = document.getElementById("slots-section");
+  const statusRow = document.getElementById("status-row");
+
+  let state = {
+    date: null,
+    selectedSlot: null,
+    holdId: null,
+    slotsData: null,
+    loading: false
+  };
+
+  function todayString() {
+    const d = new Date();
+    return d.toISOString().slice(0, 10);
+  }
+  dateInput.min = todayString();
+
+  function setStatus(message, type) {
+    statusRow.textContent = message || "";
+    statusRow.className = "status-row" + (type ? " " + type : "");
+  }
+
+  function resizeFrame() {
+    if (window.JFCustomWidget) {
+      const height = document.getElementById("widget-root").scrollHeight + 20;
+      JFCustomWidget.requestFrameResize({ height });
+    }
+  }
+
+  function sendLiveValue() {
+    if (!window.JFCustomWidget) return;
+    if (state.date && state.selectedSlot) {
+      const label = formatValue(state.date, state.selectedSlot);
+      JFCustomWidget.sendData({ value: label, valid: true });
+    } else {
+      JFCustomWidget.sendData({ value: "", valid: false });
+    }
+  }
+
+  function formatValue(date, slot) {
+    const d = new Date(date + "T00:00:00");
+    const formatted = d.toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" });
+    return "Access " + slot + " — " + formatted;
+  }
+
+  // Apps Script Web Apps don't handle CORS preflight (OPTIONS) requests, so
+  // every POST here uses Content-Type: text/plain to keep the browser from
+  // sending one. The body is still JSON - Code.gs parses it manually.
+  async function postAction(action, payload) {
+    const res = await fetch(CONFIG.API_BASE_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(Object.assign({ action: action }, payload))
+    });
+    return res.json();
+  }
+
+  async function releaseCurrentHold() {
+    if (!state.holdId || !state.date || !state.selectedSlot) return;
+    try {
+      await postAction("release", { date: state.date, slot: state.selectedSlot, holdId: state.holdId });
+    } catch (e) {
+      // Non-fatal - the hold will simply expire on its own.
+    }
+    state.holdId = null;
+  }
+
+  async function fetchAvailability(date) {
+    state.loading = true;
+    renderLoading();
+    try {
+      const url = CONFIG.API_BASE_URL + "?action=availability&date=" + encodeURIComponent(date);
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.error) {
+        setStatus(data.message || "Could not load availability.", "error");
+        state.slotsData = null;
+      } else {
+        state.slotsData = data;
+        setStatus("", "");
+      }
+    } catch (e) {
+      setStatus("Could not reach the booking service. Please check your connection.", "error");
+      state.slotsData = null;
+    }
+    state.loading = false;
+    render();
+  }
+
+  function renderLoading() {
+    slotsSection.innerHTML = '<div class="placeholder-hint"><span class="spinner"></span>Checking availability…</div>';
+    resizeFrame();
+  }
+
+  function render() {
+    if (!state.date) {
+      slotsSection.innerHTML = '<div class="placeholder-hint">Select a date to see available access slots.</div>';
+      resizeFrame();
+      return;
+    }
+    if (!state.slotsData) {
+      resizeFrame();
+      return;
+    }
+
+    if (state.slotsData.fullyBooked) {
+      slotsSection.innerHTML = '<div class="full-banner">All access slots are fully booked for this date. Please choose another date.</div>';
+      resizeFrame();
+      return;
+    }
+
+    let html = '<label class="field-label">Choose an access slot</label><div class="slot-grid">';
+    state.slotsData.slots.forEach(function (s) {
+      const isSelected = state.selectedSlot === s.slot;
+      const disabled = !s.available;
+      html += '<button type="button" class="slot-btn' + (isSelected ? ' selected' : '') + '"' +
+        (disabled ? ' disabled' : '') +
+        ' data-slot="' + s.slot + '">' +
+        '<span>Access ' + s.slot + '</span>' +
+        '<span class="sub">' + (disabled ? 'Unavailable' : 'Available') + '</span>' +
+        '</button>';
+    });
+    html += '</div>';
+    slotsSection.innerHTML = html;
+
+    slotsSection.querySelectorAll(".slot-btn").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        onSlotClick(parseInt(btn.getAttribute("data-slot"), 10));
+      });
+    });
+
+    resizeFrame();
+  }
+
+  async function onSlotClick(slotNumber) {
+    if (state.selectedSlot === slotNumber) return;
+
+    setStatus("Reserving slot…", "info");
+
+    // Release whatever we were previously holding before grabbing the new one.
+    await releaseCurrentHold();
+
+    try {
+      const data = await postAction("hold", { date: state.date, slot: slotNumber });
+
+      if (data.error) {
+        setStatus(data.message || "That slot is no longer available.", "error");
+        state.selectedSlot = null;
+        state.holdId = null;
+        await fetchAvailability(state.date);
+        sendLiveValue();
+        return;
+      }
+
+      state.selectedSlot = slotNumber;
+      state.holdId = data.holdId;
+      setStatus("Slot reserved. Complete the form to confirm your booking.", "info");
+      render();
+      sendLiveValue();
+    } catch (e) {
+      setStatus("Could not reserve this slot. Please try again.", "error");
+    }
+  }
+
+  dateInput.addEventListener("change", async function () {
+    await releaseCurrentHold();
+    state.date = dateInput.value;
+    state.selectedSlot = null;
+    setStatus("", "");
+    sendLiveValue();
+    if (state.date) {
+      await fetchAvailability(state.date);
+    } else {
+      render();
+    }
+  });
+
+  // -----------------------------------------------------------------------
+  // Jotform Custom Widget SDK wiring
+  // -----------------------------------------------------------------------
+  if (window.JFCustomWidget) {
+    JFCustomWidget.subscribe("ready", function () {
+      resizeFrame();
+    });
+
+    JFCustomWidget.subscribe("submit", async function () {
+      if (!state.date || !state.selectedSlot || !state.holdId) {
+        setStatus("Please select a date and an access slot before submitting.", "error");
+        JFCustomWidget.sendSubmit({ valid: false, value: "" });
+        return;
+      }
+
+      setStatus("Confirming your booking…", "info");
+
+      try {
+        const data = await postAction("confirm", {
+          date: state.date,
+          slot: state.selectedSlot,
+          holdId: state.holdId
+          // customerName / customerEmail / submissionId can be wired in from
+          // other Jotform fields if you want them recorded on the calendar
+          // event - see the README for how to pass those through.
+        });
+
+        if (data.error) {
+          setStatus(data.message || "Could not confirm this booking. Please reselect a slot.", "error");
+          state.selectedSlot = null;
+          state.holdId = null;
+          await fetchAvailability(state.date);
+          JFCustomWidget.sendSubmit({ valid: false, value: "" });
+          return;
+        }
+
+        const value = formatValue(state.date, state.selectedSlot);
+        JFCustomWidget.sendSubmit({ valid: true, value: value });
+      } catch (e) {
+        setStatus("Could not reach the booking service. Please try submitting again.", "error");
+        JFCustomWidget.sendSubmit({ valid: false, value: "" });
+      }
+    });
+  }
+
+  render();
+})();
+</script>
+
+</body>
+</html>
